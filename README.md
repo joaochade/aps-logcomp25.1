@@ -1,7 +1,7 @@
 # aps-logcomp25.1
 
 ## EBNF
-`program         = { declaration | statement } EOF ;
+```program         = { declaration | statement } EOF ;
 
 (* -------------------- Declarações -------------------- *)
 declaration     = const_decl | var_decl | proc_decl ;
@@ -90,4 +90,4 @@ boolean         = "true" | "false" ;
 identifier      = letter { letter | digit | "_" } ;
 letter          = "A"…"Z" | "a"…"z" ;
 digit           = "0"…"9" ;
-character       = ? qualquer caractere Unicode ? ;`
+character       = ? qualquer caractere Unicode ? ;
