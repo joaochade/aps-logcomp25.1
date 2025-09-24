@@ -1,5 +1,8 @@
 # aps-logcomp25.1
 
+## Descrição:
+Linguagem de programação de alto nível criada para controlar a CoffeeVM, uma máquina virtual que simula o funcionamento de uma cafeteira automática.
+
 ## EBNF
 ```program         = { declaration | statement } EOF ;
 
