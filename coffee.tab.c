@@ -233,7 +233,6 @@ FILE *output_file;
 int label_count = 0;
 int temp_count = 0;
 
-// Funções auxiliares para geração de código
 char* new_label();
 char* new_temp();
 void emit(const char* code);
@@ -259,14 +258,14 @@ void emit(const char* code);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 21 "coffee.y"
+#line 20 "coffee.y"
 {
     int num;
     double fnum;
     char *str;
 }
 /* Line 193 of yacc.c.  */
-#line 270 "coffee.tab.c"
+#line 269 "coffee.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -279,7 +278,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 283 "coffee.tab.c"
+#line 282 "coffee.tab.c"
 
 #ifdef short
 # undef short
@@ -605,15 +604,15 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    71,    71,    74,    76,    80,    81,    82,    87,   100,
-     105,   113,   117,   118,   122,   133,   138,   143,   152,   160,
-     162,   166,   167,   168,   169,   170,   171,   175,   182,   193,
-     198,   205,   214,   221,   228,   235,   244,   252,   260,   267,
-     273,   283,   295,   318,   336,   357,   387,   423,   427,   434,
-     438,   446,   458,   470,   488,   506,   524,   542,   560,   578,
-     590,   602,   614,   626,   638,   648,   658,   662,   668,   674,
-     675,   681,   687,   694,   699,   700,   701,   702,   703,   704,
-     708,   709,   710,   711,   715,   716,   720,   721,   725
+       0,    63,    63,    66,    68,    72,    73,    74,    78,    90,
+      95,   103,   107,   108,   112,   125,   134,   143,   155,   162,
+     164,   168,   169,   170,   171,   172,   173,   177,   184,   195,
+     199,   206,   215,   222,   229,   236,   245,   253,   261,   268,
+     274,   283,   295,   315,   318,   331,   354,   382,   386,   393,
+     397,   404,   416,   428,   446,   464,   482,   500,   518,   536,
+     548,   560,   572,   584,   596,   606,   616,   622,   627,   632,
+     635,   644,   653,   663,   669,   670,   671,   672,   673,   674,
+     678,   679,   680,   681,   685,   686,   690,   691,   695
 };
 #endif
 
@@ -1733,7 +1732,7 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 87 "coffee.y"
+#line 78 "coffee.y"
     {
         emit("    ; Declaração de variável");
         char buffer[256];
@@ -1746,7 +1745,7 @@ yyreduce:
     break;
 
   case 9:
-#line 100 "coffee.y"
+#line 90 "coffee.y"
     {
         emit("    ; Fim da receita");
         emit("    HALT");
@@ -1755,7 +1754,7 @@ yyreduce:
     break;
 
   case 10:
-#line 105 "coffee.y"
+#line 95 "coffee.y"
     {
         emit("    ; Fim da receita");
         emit("    HALT");
@@ -1764,7 +1763,7 @@ yyreduce:
     break;
 
   case 14:
-#line 122 "coffee.y"
+#line 112 "coffee.y"
     {
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    ; Requer %d moedas", (yyvsp[(2) - (2)].num));
@@ -1774,25 +1773,35 @@ yyreduce:
         snprintf(buffer, sizeof(buffer), "    SET R1 %d", (yyvsp[(2) - (2)].num));
         emit(buffer);
         emit("    CMP R0 R1");
-        emit("    JL error_insufficient_coins");
+        emit("    JGE coins_ok");
+        emit("    JMP error_insufficient_coins");
+        emit("coins_ok:");
     ;}
     break;
 
   case 15:
-#line 133 "coffee.y"
+#line 125 "coffee.y"
     {
         emit("    ; Requer água");
         emit("    SENSOR WATER_LEVEL R0");
-        emit("    JZ R0 error_no_water");
+        emit("    SET R1 10");
+        emit("    CMP R0 R1");
+        emit("    JGE water_ok");
+        emit("    JMP error_no_water");
+        emit("water_ok:");
     ;}
     break;
 
   case 16:
-#line 138 "coffee.y"
+#line 134 "coffee.y"
     {
         emit("    ; Requer grãos");
         emit("    SENSOR BEANS_LEVEL R0");
-        emit("    JZ R0 error_no_beans");
+        emit("    SET R1 10");
+        emit("    CMP R0 R1");
+        emit("    JGE beans_ok");
+        emit("    JMP error_no_beans");
+        emit("beans_ok:");
     ;}
     break;
 
@@ -1801,12 +1810,16 @@ yyreduce:
     {
         emit("    ; Requer copo");
         emit("    SENSOR CUP_PRESENT R0");
-        emit("    JZ R0 error_no_cup");
+        emit("    SET R1 1");
+        emit("    CMP R0 R1");
+        emit("    JGE cup_ok");
+        emit("    JMP error_no_cup");
+        emit("cup_ok:");
     ;}
     break;
 
   case 18:
-#line 152 "coffee.y"
+#line 155 "coffee.y"
     {
         emit("    ; Fim da rotina");
         emit("    RET");
@@ -1815,7 +1828,7 @@ yyreduce:
     break;
 
   case 27:
-#line 175 "coffee.y"
+#line 177 "coffee.y"
     {
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SET R0 %s", (yyvsp[(4) - (4)].str));
@@ -1826,7 +1839,7 @@ yyreduce:
     break;
 
   case 28:
-#line 182 "coffee.y"
+#line 184 "coffee.y"
     {
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SET R0 %s", (yyvsp[(7) - (7)].str));
@@ -1838,7 +1851,7 @@ yyreduce:
     break;
 
   case 30:
-#line 198 "coffee.y"
+#line 199 "coffee.y"
     {
         emit("    ; Moer grãos");
         emit("    ACTUATOR GRINDER 1");
@@ -1849,7 +1862,7 @@ yyreduce:
     break;
 
   case 31:
-#line 205 "coffee.y"
+#line 206 "coffee.y"
     {
         char buffer[256];
         emit("    ; Moer grãos");
@@ -1862,7 +1875,7 @@ yyreduce:
     break;
 
   case 32:
-#line 214 "coffee.y"
+#line 215 "coffee.y"
     {
         char buffer[256];
         emit("    ; Aquecer");
@@ -1873,7 +1886,7 @@ yyreduce:
     break;
 
   case 33:
-#line 221 "coffee.y"
+#line 222 "coffee.y"
     {
         char buffer[256];
         emit("    ; Aquecer");
@@ -1884,7 +1897,7 @@ yyreduce:
     break;
 
   case 34:
-#line 228 "coffee.y"
+#line 229 "coffee.y"
     {
         emit("    ; Fazer café");
         emit("    ACTUATOR PUMP 1");
@@ -1895,7 +1908,7 @@ yyreduce:
     break;
 
   case 35:
-#line 235 "coffee.y"
+#line 236 "coffee.y"
     {
         char buffer[256];
         emit("    ; Fazer café");
@@ -1908,7 +1921,7 @@ yyreduce:
     break;
 
   case 36:
-#line 244 "coffee.y"
+#line 245 "coffee.y"
     {
         char buffer[256];
         emit("    ; Dispensar líquido");
@@ -1920,7 +1933,7 @@ yyreduce:
     break;
 
   case 37:
-#line 252 "coffee.y"
+#line 253 "coffee.y"
     {
         char buffer[256];
         emit("    ; Dispensar líquido");
@@ -1932,7 +1945,7 @@ yyreduce:
     break;
 
   case 38:
-#line 260 "coffee.y"
+#line 261 "coffee.y"
     {
         char buffer[256];
         emit("    ; Esperar");
@@ -1943,7 +1956,7 @@ yyreduce:
     break;
 
   case 39:
-#line 267 "coffee.y"
+#line 268 "coffee.y"
     {
         char buffer[256];
         emit("    ; Mostrar mensagem");
@@ -1953,7 +1966,7 @@ yyreduce:
     break;
 
   case 40:
-#line 273 "coffee.y"
+#line 274 "coffee.y"
     {
         char buffer[256];
         emit("    ; Chamar rotina");
@@ -1990,69 +2003,42 @@ yyreduce:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    JZ R0 %s", label_else);
         emit(buffer);
-        // statements do then já foram processadas
         snprintf(buffer, sizeof(buffer), "    JMP %s", label_end);
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "%s:", label_else);
         emit(buffer);
-        // statements do else já foram processadas
         snprintf(buffer, sizeof(buffer), "%s:", label_end);
         emit(buffer);
     ;}
     break;
 
   case 43:
-#line 318 "coffee.y"
+#line 315 "coffee.y"
     {
-        char *label_start = new_label();
-        char *label_end = new_label();
-        char buffer[256];
-        
-        emit("    ; Loop while");
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    SET R0 %s", (yyvsp[(2) - (5)].str));
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JZ R0 %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    ; TODO: While loop - código pode estar fora de ordem");
     ;}
     break;
 
   case 44:
-#line 336 "coffee.y"
+#line 318 "coffee.y"
     {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
-        
         emit("    ; Loop repeat");
         snprintf(buffer, sizeof(buffer), "    SET R2 %s", (yyvsp[(2) - (6)].str));
         emit(buffer);
         emit("    SET R3 0");
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("repeat_start:");
         emit("    CMP R3 R2");
-        snprintf(buffer, sizeof(buffer), "    JGE %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JGE repeat_end");
         emit("    ADD R3 1");
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP repeat_start");
+        emit("repeat_end:");
     ;}
     break;
 
   case 45:
-#line 357 "coffee.y"
+#line 331 "coffee.y"
     {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
         
         emit("    ; Loop for");
@@ -2060,33 +2046,26 @@ yyreduce:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", (yyvsp[(2) - (9)].str));
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("for_start:");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(2) - (9)].str));
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", (yyvsp[(6) - (9)].str));
         emit(buffer);
         emit("    CMP R0 R1");
-        snprintf(buffer, sizeof(buffer), "    JG %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JG for_end");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(2) - (9)].str));
         emit(buffer);
         emit("    ADD R0 1");
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", (yyvsp[(2) - (9)].str));
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP for_start");
+        emit("for_end:");
     ;}
     break;
 
   case 46:
-#line 387 "coffee.y"
+#line 354 "coffee.y"
     {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
         
         emit("    ; Loop for com step");
@@ -2094,16 +2073,13 @@ yyreduce:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", (yyvsp[(2) - (11)].str));
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("for_start:");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(2) - (11)].str));
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", (yyvsp[(6) - (11)].str));
         emit(buffer);
         emit("    CMP R0 R1");
-        snprintf(buffer, sizeof(buffer), "    JG %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JG for_end");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(2) - (11)].str));
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R2 %s", (yyvsp[(8) - (11)].str));
@@ -2111,15 +2087,13 @@ yyreduce:
         emit("    ADD R0 R2");
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", (yyvsp[(2) - (11)].str));
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP for_start");
+        emit("for_end:");
     ;}
     break;
 
   case 47:
-#line 423 "coffee.y"
+#line 382 "coffee.y"
     {
         emit("    ; Abortar");
         emit("    HALT");
@@ -2127,7 +2101,7 @@ yyreduce:
     break;
 
   case 48:
-#line 427 "coffee.y"
+#line 386 "coffee.y"
     {
         char buffer[256];
         emit("    ; Abortar com mensagem");
@@ -2138,7 +2112,7 @@ yyreduce:
     break;
 
   case 49:
-#line 434 "coffee.y"
+#line 393 "coffee.y"
     {
         emit("    ; Exit (break)");
         emit("    JMP loop_end");
@@ -2146,7 +2120,7 @@ yyreduce:
     break;
 
   case 50:
-#line 438 "coffee.y"
+#line 397 "coffee.y"
     {
         emit("    ; Skip (continue)");
         emit("    JMP loop_start");
@@ -2154,7 +2128,7 @@ yyreduce:
     break;
 
   case 51:
-#line 446 "coffee.y"
+#line 404 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2170,7 +2144,7 @@ yyreduce:
     break;
 
   case 52:
-#line 458 "coffee.y"
+#line 416 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2186,7 +2160,7 @@ yyreduce:
     break;
 
   case 53:
-#line 470 "coffee.y"
+#line 428 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2208,7 +2182,7 @@ yyreduce:
     break;
 
   case 54:
-#line 488 "coffee.y"
+#line 446 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2230,7 +2204,7 @@ yyreduce:
     break;
 
   case 55:
-#line 506 "coffee.y"
+#line 464 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2252,7 +2226,7 @@ yyreduce:
     break;
 
   case 56:
-#line 524 "coffee.y"
+#line 482 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2274,7 +2248,7 @@ yyreduce:
     break;
 
   case 57:
-#line 542 "coffee.y"
+#line 500 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2296,7 +2270,7 @@ yyreduce:
     break;
 
   case 58:
-#line 560 "coffee.y"
+#line 518 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2318,7 +2292,7 @@ yyreduce:
     break;
 
   case 59:
-#line 578 "coffee.y"
+#line 536 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2334,7 +2308,7 @@ yyreduce:
     break;
 
   case 60:
-#line 590 "coffee.y"
+#line 548 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2350,7 +2324,7 @@ yyreduce:
     break;
 
   case 61:
-#line 602 "coffee.y"
+#line 560 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2366,7 +2340,7 @@ yyreduce:
     break;
 
   case 62:
-#line 614 "coffee.y"
+#line 572 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2382,7 +2356,7 @@ yyreduce:
     break;
 
   case 63:
-#line 626 "coffee.y"
+#line 584 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2398,7 +2372,7 @@ yyreduce:
     break;
 
   case 64:
-#line 638 "coffee.y"
+#line 596 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2412,7 +2386,7 @@ yyreduce:
     break;
 
   case 65:
-#line 648 "coffee.y"
+#line 606 "coffee.y"
     {
         char *result = new_temp();
         char buffer[256];
@@ -2426,14 +2400,15 @@ yyreduce:
     break;
 
   case 66:
-#line 658 "coffee.y"
-    { (yyval.str) = (yyvsp[(1) - (1)].str); ;}
+#line 616 "coffee.y"
+    {
+        (yyval.str) = (yyvsp[(1) - (1)].str);
+    ;}
     break;
 
   case 67:
-#line 662 "coffee.y"
+#line 622 "coffee.y"
     {
-        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%d", (yyvsp[(1) - (1)].num));
         (yyval.str) = strdup(buffer);
@@ -2441,9 +2416,8 @@ yyreduce:
     break;
 
   case 68:
-#line 668 "coffee.y"
+#line 627 "coffee.y"
     {
-        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%.2f", (yyvsp[(1) - (1)].fnum));
         (yyval.str) = strdup(buffer);
@@ -2451,99 +2425,112 @@ yyreduce:
     break;
 
   case 69:
-#line 674 "coffee.y"
-    { (yyval.str) = (yyvsp[(1) - (1)].str); ;}
-    break;
-
-  case 70:
-#line 675 "coffee.y"
+#line 632 "coffee.y"
     {
-        char buffer[256];
-        snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(1) - (1)].str));
-        emit(buffer);
         (yyval.str) = (yyvsp[(1) - (1)].str);
     ;}
     break;
 
-  case 71:
-#line 681 "coffee.y"
+  case 70:
+#line 635 "coffee.y"
     {
+        char *temp = new_temp();
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", (yyvsp[(1) - (1)].str));
+        emit(buffer);
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        (yyval.str) = temp;
+    ;}
+    break;
+
+  case 71:
+#line 644 "coffee.y"
+    {
+        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SENSOR %s R0", (yyvsp[(2) - (2)].str));
         emit(buffer);
-        (yyval.str) = strdup("R0");
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        (yyval.str) = temp;
     ;}
     break;
 
   case 72:
-#line 687 "coffee.y"
+#line 653 "coffee.y"
     {
+        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", (yyvsp[(3) - (4)].str));
         emit(buffer);
         emit("    LOAD_MEM R0 R1");
-        (yyval.str) = strdup("R0");
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        (yyval.str) = temp;
     ;}
     break;
 
   case 73:
-#line 694 "coffee.y"
-    { (yyval.str) = (yyvsp[(2) - (3)].str); ;}
+#line 663 "coffee.y"
+    {
+        (yyval.str) = (yyvsp[(2) - (3)].str);
+    ;}
     break;
 
   case 74:
-#line 699 "coffee.y"
+#line 669 "coffee.y"
     { (yyval.str) = strdup("COIN_INSERTED"); ;}
     break;
 
   case 75:
-#line 700 "coffee.y"
+#line 670 "coffee.y"
     { (yyval.str) = strdup("WATER_LEVEL"); ;}
     break;
 
   case 76:
-#line 701 "coffee.y"
+#line 671 "coffee.y"
     { (yyval.str) = strdup("BEANS_LEVEL"); ;}
     break;
 
   case 77:
-#line 702 "coffee.y"
+#line 672 "coffee.y"
     { (yyval.str) = strdup("CUP_PRESENT"); ;}
     break;
 
   case 78:
-#line 703 "coffee.y"
+#line 673 "coffee.y"
     { (yyval.str) = strdup("CURRENT_TEMP"); ;}
     break;
 
   case 79:
-#line 704 "coffee.y"
+#line 674 "coffee.y"
     { (yyval.str) = strdup("EMERGENCY"); ;}
     break;
 
   case 80:
-#line 708 "coffee.y"
+#line 678 "coffee.y"
     { (yyval.str) = strdup("WATER"); ;}
     break;
 
   case 81:
-#line 709 "coffee.y"
+#line 679 "coffee.y"
     { (yyval.str) = strdup("COFFEE"); ;}
     break;
 
   case 82:
-#line 710 "coffee.y"
+#line 680 "coffee.y"
     { (yyval.str) = strdup("STEAM"); ;}
     break;
 
   case 83:
-#line 711 "coffee.y"
+#line 681 "coffee.y"
     { (yyval.str) = strdup("MILK"); ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2547 "coffee.tab.c"
+#line 2534 "coffee.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2757,7 +2744,7 @@ yyreturn:
 }
 
 
-#line 728 "coffee.y"
+#line 698 "coffee.y"
 
 
 void yyerror(const char *s) {
@@ -2803,6 +2790,23 @@ int main(int argc, char **argv) {
     fprintf(output_file, "; Gerado automaticamente\n\n");
 
     yyparse();
+
+    fprintf(output_file, "\n; Labels de erro\n");
+    fprintf(output_file, "error_insufficient_coins:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Moedas insuficientes\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_water:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem água\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_beans:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem grãos\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_cup:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem copo\"\n");
+    fprintf(output_file, "    HALT\n");
 
     fclose(yyin);
     fclose(output_file);

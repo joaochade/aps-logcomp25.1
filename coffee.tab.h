@@ -192,7 +192,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 21 "coffee.y"
+#line 20 "coffee.y"
 {
     int num;
     double fnum;

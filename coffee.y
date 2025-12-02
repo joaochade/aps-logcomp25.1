@@ -12,7 +12,6 @@ FILE *output_file;
 int label_count = 0;
 int temp_count = 0;
 
-// Funções auxiliares para geração de código
 char* new_label();
 char* new_temp();
 void emit(const char* code);
@@ -24,7 +23,6 @@ void emit(const char* code);
     char *str;
 }
 
-/* Tokens - Palavras-chave */
 %token RECIPE ROUTINE REQUIRES STEPS SET
 %token COINS WATER BEANS CUP
 %token GRIND HEAT BREW DISPENSE WAIT SHOW DO
@@ -33,28 +31,22 @@ void emit(const char* code);
 %token SENSE MEMORY
 %token COFFEE STEAM MILK
 
-/* Tokens - Sensores */
 %token SENSOR_COIN SENSOR_WATER SENSOR_BEANS SENSOR_CUP 
 %token SENSOR_TEMP SENSOR_EMERGENCY
 
-/* Tokens - Unidades */
 %token CELSIUS FAHRENHEIT ML SECONDS MILLISECONDS
 
-/* Tokens - Operadores */
 %token AND OR NOT
 %token EQ NE LE GE LT GT
 %token PLUS MINUS MULT DIV MOD
 
-/* Tokens - Delimitadores */
 %token ASSIGN SEMICOLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 
-/* Tokens - Literais */
 %token <num> NUMBER
 %token <fnum> FLOAT
 %token <str> STRING IDENTIFIER
 
-/* Precedência de operadores */
 %left OR
 %left AND
 %left EQ NE
@@ -82,7 +74,6 @@ declaration:
     | var_decl
     ;
 
-/* -------------------- Variáveis -------------------- */
 var_decl:
     SET IDENTIFIER ASSIGN expression SEMICOLON {
         emit("    ; Declaração de variável");
@@ -95,7 +86,6 @@ var_decl:
     }
     ;
 
-/* -------------------- Receitas -------------------- */
 recipe_def:
     RECIPE IDENTIFIER requirements STEPS LBRACE statements RBRACE {
         emit("    ; Fim da receita");
@@ -128,26 +118,39 @@ requirement:
         snprintf(buffer, sizeof(buffer), "    SET R1 %d", $2);
         emit(buffer);
         emit("    CMP R0 R1");
-        emit("    JL error_insufficient_coins");
+        emit("    JGE coins_ok");
+        emit("    JMP error_insufficient_coins");
+        emit("coins_ok:");
     }
     | WATER {
         emit("    ; Requer água");
         emit("    SENSOR WATER_LEVEL R0");
-        emit("    JZ R0 error_no_water");
+        emit("    SET R1 10");
+        emit("    CMP R0 R1");
+        emit("    JGE water_ok");
+        emit("    JMP error_no_water");
+        emit("water_ok:");
     }
     | BEANS {
         emit("    ; Requer grãos");
         emit("    SENSOR BEANS_LEVEL R0");
-        emit("    JZ R0 error_no_beans");
+        emit("    SET R1 10");
+        emit("    CMP R0 R1");
+        emit("    JGE beans_ok");
+        emit("    JMP error_no_beans");
+        emit("beans_ok:");
     }
     | CUP {
         emit("    ; Requer copo");
         emit("    SENSOR CUP_PRESENT R0");
-        emit("    JZ R0 error_no_cup");
+        emit("    SET R1 1");
+        emit("    CMP R0 R1");
+        emit("    JGE cup_ok");
+        emit("    JMP error_no_cup");
+        emit("cup_ok:");
     }
     ;
 
-/* -------------------- Rotinas -------------------- */
 routine_def:
     ROUTINE IDENTIFIER LBRACE statements RBRACE {
         emit("    ; Fim da rotina");
@@ -156,7 +159,6 @@ routine_def:
     }
     ;
 
-/* -------------------- Comandos -------------------- */
 statements:
     /* vazio */
     | statements statement
@@ -193,7 +195,6 @@ block:
     LBRACE statements RBRACE
     ;
 
-/* -------------------- Ações -------------------- */
 action:
     GRIND {
         emit("    ; Moer grãos");
@@ -278,7 +279,6 @@ action:
     }
     ;
 
-/* -------------------- Condicionais -------------------- */
 conditional:
     CHECK expression LBRACE statements RBRACE {
         char *label_end = new_label();
@@ -302,61 +302,33 @@ conditional:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    JZ R0 %s", label_else);
         emit(buffer);
-        // statements do then já foram processadas
         snprintf(buffer, sizeof(buffer), "    JMP %s", label_end);
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "%s:", label_else);
         emit(buffer);
-        // statements do else já foram processadas
         snprintf(buffer, sizeof(buffer), "%s:", label_end);
         emit(buffer);
     }
     ;
 
-/* -------------------- Loops -------------------- */
 loop:
     WHILE expression LBRACE statements RBRACE {
-        char *label_start = new_label();
-        char *label_end = new_label();
-        char buffer[256];
-        
-        emit("    ; Loop while");
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    SET R0 %s", $2);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JZ R0 %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    ; TODO: While loop - código pode estar fora de ordem");
     }
     | REPEAT expression TIMES LBRACE statements RBRACE {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
-        
         emit("    ; Loop repeat");
         snprintf(buffer, sizeof(buffer), "    SET R2 %s", $2);
         emit(buffer);
         emit("    SET R3 0");
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("repeat_start:");
         emit("    CMP R3 R2");
-        snprintf(buffer, sizeof(buffer), "    JGE %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JGE repeat_end");
         emit("    ADD R3 1");
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP repeat_start");
+        emit("repeat_end:");
     }
     | FOR IDENTIFIER FROM expression TO expression LBRACE statements RBRACE {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
         
         emit("    ; Loop for");
@@ -364,29 +336,22 @@ loop:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", $2);
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("for_start:");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", $2);
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", $6);
         emit(buffer);
         emit("    CMP R0 R1");
-        snprintf(buffer, sizeof(buffer), "    JG %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JG for_end");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", $2);
         emit(buffer);
         emit("    ADD R0 1");
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", $2);
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP for_start");
+        emit("for_end:");
     }
     | FOR IDENTIFIER FROM expression TO expression STEP expression LBRACE statements RBRACE {
-        char *label_start = new_label();
-        char *label_end = new_label();
         char buffer[256];
         
         emit("    ; Loop for com step");
@@ -394,16 +359,13 @@ loop:
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", $2);
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_start);
-        emit(buffer);
+        emit("for_start:");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", $2);
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", $6);
         emit(buffer);
         emit("    CMP R0 R1");
-        snprintf(buffer, sizeof(buffer), "    JG %s", label_end);
-        emit(buffer);
-        // statements já foram processadas
+        emit("    JG for_end");
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", $2);
         emit(buffer);
         snprintf(buffer, sizeof(buffer), "    SET R2 %s", $8);
@@ -411,14 +373,11 @@ loop:
         emit("    ADD R0 R2");
         snprintf(buffer, sizeof(buffer), "    STORE R0 %s", $2);
         emit(buffer);
-        snprintf(buffer, sizeof(buffer), "    JMP %s", label_start);
-        emit(buffer);
-        snprintf(buffer, sizeof(buffer), "%s:", label_end);
-        emit(buffer);
+        emit("    JMP for_start");
+        emit("for_end:");
     }
     ;
 
-/* -------------------- Controle de Fluxo -------------------- */
 control_flow:
     ABORT {
         emit("    ; Abortar");
@@ -441,7 +400,6 @@ control_flow:
     }
     ;
 
-/* -------------------- Expressões -------------------- */
 expression:
     expression OR expression {
         char *result = new_temp();
@@ -655,46 +613,58 @@ expression:
         emit(buffer);
         $$ = result;
     }
-    | primary { $$ = $1; }
+    | primary {
+        $$ = $1;
+    }
     ;
 
 primary:
     NUMBER {
-        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%d", $1);
         $$ = strdup(buffer);
     }
     | FLOAT {
-        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "%.2f", $1);
         $$ = strdup(buffer);
     }
-    | STRING { $$ = $1; }
+    | STRING {
+        $$ = $1;
+    }
     | IDENTIFIER {
+        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    LOAD R0 %s", $1);
         emit(buffer);
-        $$ = $1;
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        $$ = temp;
     }
     | SENSE sensor_name {
+        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SENSOR %s R0", $2);
         emit(buffer);
-        $$ = strdup("R0");
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        $$ = temp;
     }
     | MEMORY LBRACKET expression RBRACKET {
+        char *temp = new_temp();
         char buffer[256];
         snprintf(buffer, sizeof(buffer), "    SET R1 %s", $3);
         emit(buffer);
         emit("    LOAD_MEM R0 R1");
-        $$ = strdup("R0");
+        snprintf(buffer, sizeof(buffer), "    STORE R0 %s", temp);
+        emit(buffer);
+        $$ = temp;
     }
-    | LPAREN expression RPAREN { $$ = $2; }
+    | LPAREN expression RPAREN {
+        $$ = $2;
+    }
     ;
 
-/* -------------------- Tipos Auxiliares -------------------- */
 sensor_name:
     SENSOR_COIN { $$ = strdup("COIN_INSERTED"); }
     | SENSOR_WATER { $$ = strdup("WATER_LEVEL"); }
@@ -770,6 +740,23 @@ int main(int argc, char **argv) {
     fprintf(output_file, "; Gerado automaticamente\n\n");
 
     yyparse();
+
+    fprintf(output_file, "\n; Labels de erro\n");
+    fprintf(output_file, "error_insufficient_coins:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Moedas insuficientes\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_water:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem água\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_beans:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem grãos\"\n");
+    fprintf(output_file, "    HALT\n\n");
+    
+    fprintf(output_file, "error_no_cup:\n");
+    fprintf(output_file, "    DISPLAY \"Erro: Sem copo\"\n");
+    fprintf(output_file, "    HALT\n");
 
     fclose(yyin);
     fclose(output_file);
