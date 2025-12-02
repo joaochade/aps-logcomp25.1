@@ -1,48 +1,41 @@
-# Makefile para Mac M1 (ARM64)
+# Makefile para CoffeeLang Compiler
+
 CC = gcc
 FLEX = flex
 BISON = bison
-
-# Flags para Mac M1
 CFLAGS = -Wall -g
-LDFLAGS =
 
-# Nome do executável
-TARGET = parser
-
-# Arquivos fonte
-LEXER = lexer.l
-PARSER = parser.y
-
-# Arquivos gerados
+# Arquivos
+LEXER = coffee.l
+PARSER = coffee.y
 LEXER_C = lex.yy.c
-PARSER_C = parser.tab.c
-PARSER_H = parser.tab.h
+PARSER_C = coffee.tab.c
+PARSER_H = coffee.tab.h
+EXECUTABLE = coffeec
 
-# Regra padrão
-all: $(TARGET)
+# Arquivos de teste
+TEST_INPUT = exemplo.coffee
+TEST_OUTPUT = output.asm
 
-# Gera o parser
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(LEXER_C) $(PARSER_C)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(PARSER_C) $(LEXER_C) -lfl
+
 $(PARSER_C) $(PARSER_H): $(PARSER)
 	$(BISON) -d $(PARSER)
 
-# Gera o lexer
 $(LEXER_C): $(LEXER) $(PARSER_H)
 	$(FLEX) $(LEXER)
 
-# Compila o executável
-$(TARGET): $(PARSER_C) $(LEXER_C)
-	$(CC) $(CFLAGS) -o $(TARGET) $(PARSER_C) $(LEXER_C) $(LDFLAGS)
+test: $(EXECUTABLE)
+	./$(EXECUTABLE) $(TEST_INPUT) $(TEST_OUTPUT)
+	@echo "\n=== Código Assembly Gerado ==="
+	@cat $(TEST_OUTPUT)
 
-# Testa com arquivo de exemplo
-test: $(TARGET)
-	./$(TARGET) test.txt
-
-# Limpa arquivos gerados
 clean:
-	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H)
+	rm -f $(EXECUTABLE) $(LEXER_C) $(PARSER_C) $(PARSER_H) $(TEST_OUTPUT) *.o
 
-# Limpa e recompila
 rebuild: clean all
 
 .PHONY: all clean test rebuild
