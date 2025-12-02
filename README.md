@@ -4,10 +4,9 @@
 Linguagem de programação de alto nível criada para controlar a CoffeeVM, uma máquina virtual que simula o funcionamento de uma cafeteira automática.
 
 ## EBNF
-(* ============================================================
+```
    CoffeeLang - Linguagem de Programação para Máquina de Café
    Com variáveis, condicionais e loops
-   ============================================================ *)
 
 program = { declaration } ;
 
@@ -127,3 +126,4 @@ string     = "\"" { character - "\"" } "\"" ;
 letter     = "a"…"z" | "A"…"Z" ;
 digit      = "0"…"9" ;
 character  = ? qualquer caractere imprimível ? ;
+```
